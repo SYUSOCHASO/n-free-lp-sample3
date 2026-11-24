@@ -153,6 +153,21 @@ $(function(){
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var targets = [];
 
+    // ヒーロー見出しの 1 行目を 1 文字ずつに分ける（文言はそのまま、動かす単位だけ分ける）
+    var firstLine = document.querySelector('.hero-title-line:not(.hero-title-accent)');
+    if (firstLine && !reduce && !firstLine.children.length) {
+        var chars = Array.from(firstLine.textContent);
+        firstLine.textContent = '';
+        chars.forEach(function (ch, i) {
+            var span = document.createElement('span');
+            span.className = 'ch';
+            span.style.setProperty('--c', i);
+            span.textContent = ch;
+            firstLine.appendChild(span);
+        });
+        firstLine.classList.add('is-split');
+    }
+
     function add(el, cls, index) {
         el.classList.add(cls);
         if (index) el.style.setProperty('--i', Math.min(index, 6));
