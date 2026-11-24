@@ -263,20 +263,6 @@ header { border-bottom: 2px solid var(--c-ink); }
 
 /* ---------- ヒーロー（緑の全面） ---------- */
 .hero { position: relative; background: var(--c-green); color: var(--c-ink); overflow: hidden; }
-/* 斜めの帯が流れ続ける背景（ロゴ N の傾きに合わせる） */
-.hero::before, .hero::after { content: ""; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 260%; pointer-events: none; }
-.hero::before {
-  background: repeating-linear-gradient(90deg, transparent 0 300px, rgba(255, 255, 255, .16) 300px 420px, transparent 420px 560px, rgba(0, 0, 0, .045) 560px 600px);
-  transform: skewX(-20deg);
-  animation: band-drift 26s linear infinite;
-}
-.hero::after {
-  background: repeating-linear-gradient(90deg, transparent 0 196px, rgba(255, 255, 255, .22) 196px 200px, transparent 200px 392px, rgba(0, 0, 0, .07) 392px 400px);
-  transform: skewX(-20deg);
-  animation: band-drift-back 18s linear infinite;
-}
-@keyframes band-drift { from { transform: skewX(-20deg) translateX(0); } to { transform: skewX(-20deg) translateX(-600px); } }
-@keyframes band-drift-back { from { transform: skewX(-20deg) translateX(-400px); } to { transform: skewX(-20deg) translateX(0); } }
 
 .hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 48px; align-items: center; }
 .hero-body { padding: 72px 0 88px; }
@@ -565,7 +551,6 @@ main { overflow-x: clip; }
 
 /* ---------- 最後の申し込み ---------- */
 .sec-final { position: relative; background: var(--c-green); padding: 112px 0; overflow: hidden; }
-.sec-final::before { content: ""; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 260%; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 300px, rgba(255, 255, 255, .16) 300px 420px, transparent 420px 560px, rgba(0, 0, 0, .045) 560px 600px); transform: skewX(-20deg); animation: band-drift 26s linear infinite; }
 .sec-final > .inner { position: relative; }
 .sec-final .cta { flex-direction: column; align-items: stretch; gap: 28px; margin-top: 0; }
 .sec-final .cta-note { order: -2; font-size: clamp(24px, 3.6vw, 48px); line-height: 1.4; }
@@ -599,8 +584,6 @@ main { overflow-x: clip; }
   /* スマホでは端末画像を小さくし、ヒーローの中に収める（次のセクションに掛からない） */
   .hero-visual { width: 190px; margin: 0 auto; padding: 44px 0 56px; }
   @keyframes phone-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-10px) rotate(-1.4deg); } }
-  .hero::before { animation-duration: 20s; }
-  .hero::after { animation-duration: 14s; }
   .sec { padding: 80px 0; }
   .sec-head { margin-bottom: 40px; }
   .sec-problems { padding-bottom: 0; }
@@ -643,4 +626,24 @@ main { overflow-x: clip; }
   .contact-list { gap: 40px; }
   .sec-final { padding: 72px 0; }
   .sec-final .btn-cta { min-height: 88px; }
+}
+
+/* 背景A：ロゴ N の傾きに合わせた斜めの帯が流れ続ける */
+.hero::before, .hero::after { content: ""; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 260%; pointer-events: none; }
+.hero::before {
+  background: repeating-linear-gradient(90deg, transparent 0 300px, rgba(255, 255, 255, .16) 300px 420px, transparent 420px 560px, rgba(0, 0, 0, .045) 560px 600px);
+  transform: skewX(-20deg);
+  animation: band-drift 26s linear infinite;
+}
+.hero::after {
+  background: repeating-linear-gradient(90deg, transparent 0 196px, rgba(255, 255, 255, .22) 196px 200px, transparent 200px 392px, rgba(0, 0, 0, .07) 392px 400px);
+  transform: skewX(-20deg);
+  animation: band-drift-back 18s linear infinite;
+}
+@keyframes band-drift { from { transform: skewX(-20deg) translateX(0); } to { transform: skewX(-20deg) translateX(-600px); } }
+@keyframes band-drift-back { from { transform: skewX(-20deg) translateX(-400px); } to { transform: skewX(-20deg) translateX(0); } }
+.sec-final::before { content: ""; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 260%; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 300px, rgba(255, 255, 255, .16) 300px 420px, transparent 420px 560px, rgba(0, 0, 0, .045) 560px 600px); transform: skewX(-20deg); animation: band-drift 26s linear infinite; }
+@media (max-width: 768px) {
+  .hero::before { animation-duration: 20s; }
+  .hero::after { animation-duration: 14s; }
 }
