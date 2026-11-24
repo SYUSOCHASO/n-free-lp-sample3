@@ -148,7 +148,7 @@ $(function(){
 ------------------------------------------------------------ */
 (function () {
     var root = document.documentElement;
-    if (!('IntersectionObserver' in window)) { root.classList.remove('js'); return; }
+    if (!window.requestAnimationFrame || !document.documentElement.classList) { root.classList.remove('js'); return; }
     window.__rv = true;
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var targets = [];
@@ -171,28 +171,63 @@ $(function(){
     function add(el, cls, index) {
         el.classList.add(cls);
         if (index) el.style.setProperty('--i', Math.min(index, 6));
-        targets.push(el);
+        if (targets.indexOf(el) < 0) targets.push(el);
     }
+    // selector に合う要素へ演出を割り当てる。fn(el, 兄弟の中での順番)
     function each(selector, fn) {
         Array.prototype.forEach.call(document.querySelectorAll(selector), function (el) {
-            var siblings = el.parentNode ? Array.prototype.filter.call(el.parentNode.children, function (c) { return c.matches(selector); }) : [el];
+            var siblings = Array.prototype.filter.call(el.parentNode.children, function (c) { return c.matches(selector); });
             fn(el, Math.max(siblings.indexOf(el), 0));
         });
     }
+    function set(selector, cls) { each(selector, function (el, i) { add(el, cls, i); }); }
 
-    // 見出し類：左から右へ拭うように現れる
-    each('main .sec-title, .statement-main, .expense-lead, .sub-title, .voice, .sec-final .cta-note', function (el) { add(el, 'rv-wipe', 0); });
-    // 帯：背景色が左から伸びる
-    each('.statement', function (el) { add(el, 'rv-band', 0); });
-    // 罫線付きの項目：線が左から引かれ、中身が下から現れる
-    each('.problem, .step, .contact-item', function (el, i) {
+    // --- お悩み：見出しは拭き出し、行は罫線が引かれて左から滑り込む
+    set('.sec-problems .sec-title', 'rv-wipe');
+    each('.problem', function (el, i) { add(el, 'rv-line', i); add(el.firstElementChild, 'rv-left', i); });
+    // --- 帯（黒 / 緑）：背景色が伸び、文がせり上がる
+    set('.statement', 'rv-band');
+    set('.statement-main', 'rv-rise');
+    set('.statement-note', 'rv-up');
+    // --- 特徴：見出しはピントが合い、項目は左右から交互に入る
+    set('.sec-features .sec-title', 'rv-focus');
+    each('.feature', function (el, i) { add(el, i % 2 ? 'rv-right' : 'rv-left', i); });
+    // --- 導入までの流れ：線が引かれ、番号が上から落ち、順番に進む
+    set('.sec-flow .sec-title', 'rv-rise');
+    each('.step', function (el, i) {
+        add(el, 'rv-line', i);
+        Array.prototype.forEach.call(el.children, function (child) { add(child, child.classList.contains('step-no') ? 'rv-drop' : 'rv-up', i); });
+    });
+    // --- 必要性：見出しは拭き出し、文は右から入る
+    set('.sec-needs .sec-title', 'rv-wipe');
+    set('.needs-list li', 'rv-right');
+    // --- 無申告のリスク：見出しはピントが合い、項目は札がめくれる
+    set('.sec-risk .sec-title', 'rv-focus');
+    set('.risk', 'rv-flip');
+    // --- 事前準備とポイント：小見出しは下線が引かれ、2 つの色面は幕が開く
+    set('.sec-prep .sec-title', 'rv-rise');
+    set('.sub-title', 'rv-uline');
+    set('.reserve-list li', 'rv-up');
+    set('.point', 'rv-down');
+    set('.voice', 'rv-wipe');
+    // --- 料金：見出しはせり上がり、料金の枠は広がって数字が駆け上がる
+    set('.sec-price .sec-title', 'rv-rise');
+    set('.plan', 'rv-zoom');
+    set('.expense-lead', 'rv-wipe');
+    set('.expense-title', 'rv-left');
+    set('.expense-tags li', 'rv-pop');
+    set('.expense-more', 'rv-up');
+    // --- お問い合わせ：見出しは拭き出し、項目は線が引かれて下から
+    set('.sec-contact .sec-title', 'rv-wipe');
+    each('.contact-item', function (el, i) {
         add(el, 'rv-line', i);
         Array.prototype.forEach.call(el.children, function (child) { add(child, 'rv-up', i); });
     });
-    // そのほかの項目：下から順番に現れる
-    each('.statement-note, .feature, .needs-list li, .risk, .reserve-list li, .point, .plan, .expense-title, .expense-more, .cta:not(.sec-final .cta), .sec-final .btn-cta, .contact-action', function (el, i) { add(el, 'rv-up', i); });
-    // 経費ラベル：ひとつずつ弾むように現れる
-    each('.expense-tags li', function (el, i) { add(el, 'rv-pop', i); });
+    set('.contact-action', 'rv-pop');
+    // --- 申し込みボタン：途中のものは弾んで出る。最後のものは左から右へ伸びる
+    set('.sec-features .cta, .sec-risk .cta', 'rv-pop');
+    set('.sec-final .cta-note', 'rv-rise');
+    set('.sec-final .btn-cta', 'rv-extend');
 
     // 料金：0 から数字が駆け上がる
     function countUp(el) {
@@ -212,21 +247,39 @@ $(function(){
         requestAnimationFrame(frame);
     }
 
-    var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-            var el = entry.target;
-            observer.unobserve(el);
-            el.classList.add('is-in');
-            if (el.classList.contains('plan')) {
-                var price = el.querySelector('.plan-price strong');
-                if (price) countUp(price);
-            }
-            // 現れ終わったら演出用のクラスを外し、ホバーなど元の動きに戻す
-            if (!el.classList.contains('rv-band') && !el.classList.contains('rv-line')) {
-                setTimeout(function () { el.classList.remove('rv-up', 'rv-wipe', 'rv-pop', 'is-in'); el.style.removeProperty('--i'); }, 2200);
-            }
+    // 画面に入ったら .is-in を付ける。
+    // IntersectionObserver は使わない：clip-path で隠した要素は「見えている部分」で判定されるため、
+    // スマホ幅では見出しが画面内に入っても検知されず、隠れたままになった。位置を直接見れば clip-path の影響を受けない
+    function reveal(el) {
+        el.classList.add('is-in');
+        if (el.classList.contains('plan')) {
+            var price = el.querySelector('.plan-price strong');
+            if (price) countUp(price);
+        }
+        // 現れ終わったら演出用のクラスを外し、ホバーなど元の動きに戻す（帯と罫線は残す）
+        if (!/rv-(band|line|uline)/.test(el.className)) {
+            setTimeout(function () {
+                el.className = el.className.replace(/\brv-[a-z]+\b|\bis-in\b/g, '').replace(/\s+/g, ' ').trim();
+                el.style.removeProperty('--i');
+            }, 2800);
+        }
+    }
+    var ticking = false;
+    function check() {
+        ticking = false;
+        var limit = window.innerHeight * 0.9;
+        targets = targets.filter(function (el) {
+            if (el.getBoundingClientRect().top < limit) { reveal(el); return false; }
+            return true;
         });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0 });
-    targets.forEach(function (el) { observer.observe(el); });
+        if (!targets.length) {
+            window.removeEventListener('scroll', request);
+            window.removeEventListener('resize', request);
+        }
+    }
+    function request() { if (!ticking) { ticking = true; requestAnimationFrame(check); } }
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    window.addEventListener('load', request);
+    request();
 })();
