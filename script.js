@@ -142,3 +142,76 @@ $(function(){
     return false;
     });
 });
+/* ------------------------------------------------------------
+   案3：スクロールで現れる動きと、料金のカウントアップ
+   （CSS 側は .js .rv-* / .is-in。JS が動かない環境では何も隠さない）
+------------------------------------------------------------ */
+(function () {
+    var root = document.documentElement;
+    if (!('IntersectionObserver' in window)) { root.classList.remove('js'); return; }
+    window.__rv = true;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var targets = [];
+
+    function add(el, cls, index) {
+        el.classList.add(cls);
+        if (index) el.style.setProperty('--i', Math.min(index, 6));
+        targets.push(el);
+    }
+    function each(selector, fn) {
+        Array.prototype.forEach.call(document.querySelectorAll(selector), function (el) {
+            var siblings = el.parentNode ? Array.prototype.filter.call(el.parentNode.children, function (c) { return c.matches(selector); }) : [el];
+            fn(el, Math.max(siblings.indexOf(el), 0));
+        });
+    }
+
+    // 見出し類：左から右へ拭うように現れる
+    each('main .sec-title, .statement-main, .expense-lead, .sub-title, .voice, .sec-final .cta-note', function (el) { add(el, 'rv-wipe', 0); });
+    // 帯：背景色が左から伸びる
+    each('.statement', function (el) { add(el, 'rv-band', 0); });
+    // 罫線付きの項目：線が左から引かれ、中身が下から現れる
+    each('.problem, .step, .contact-item', function (el, i) {
+        add(el, 'rv-line', i);
+        Array.prototype.forEach.call(el.children, function (child) { add(child, 'rv-up', i); });
+    });
+    // そのほかの項目：下から順番に現れる
+    each('.statement-note, .feature, .needs-list li, .risk, .reserve-list li, .point, .plan, .expense-title, .expense-more, .cta:not(.sec-final .cta), .sec-final .btn-cta, .contact-action', function (el, i) { add(el, 'rv-up', i); });
+    // 経費ラベル：ひとつずつ弾むように現れる
+    each('.expense-tags li', function (el, i) { add(el, 'rv-pop', i); });
+
+    // 料金：0 から数字が駆け上がる
+    function countUp(el) {
+        var finalText = el.textContent;
+        var value = parseInt(finalText.replace(/[^\d]/g, ''), 10);
+        var prefix = finalText.replace(/[\d,].*$/, '');
+        if (reduce || !value) return;
+        el.style.minWidth = el.getBoundingClientRect().width + 'px';
+        var start = null, duration = 1400;
+        function frame(now) {
+            if (start === null) start = now;
+            var t = Math.min((now - start) / duration, 1);
+            var eased = 1 - Math.pow(1 - t, 4);
+            el.textContent = prefix + Math.round(value * eased).toLocaleString('ja-JP');
+            if (t < 1) { requestAnimationFrame(frame); } else { el.textContent = finalText; }
+        }
+        requestAnimationFrame(frame);
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var el = entry.target;
+            observer.unobserve(el);
+            el.classList.add('is-in');
+            if (el.classList.contains('plan')) {
+                var price = el.querySelector('.plan-price strong');
+                if (price) countUp(price);
+            }
+            // 現れ終わったら演出用のクラスを外し、ホバーなど元の動きに戻す
+            if (!el.classList.contains('rv-band') && !el.classList.contains('rv-line')) {
+                setTimeout(function () { el.classList.remove('rv-up', 'rv-wipe', 'rv-pop', 'is-in'); el.style.removeProperty('--i'); }, 2200);
+            }
+        });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0 });
+    targets.forEach(function (el) { observer.observe(el); });
+})();
