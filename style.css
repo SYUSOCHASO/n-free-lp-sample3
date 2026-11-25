@@ -679,17 +679,15 @@ main { overflow-x: clip; }
 .hero::before, .hero::after { pointer-events: none; }
 .hero-bg { position: absolute; pointer-events: none; }
 
-/* 案3：ブルー × 白文字 × イエロー。右肩上がりの線が左から描かれ、先端の点が脈を打ち続ける（SVG は script.js が置く） */
-.hero { --h-bg: #1648c8; --h-text: #fff; --h-accent: #ffd84a; --h-line: rgba(255, 255, 255, .6); --h-chip-bg: #fff; --h-chip-text: #1648c8; --h-btn-bg: #fff; --h-btn-text: #1648c8; --h-tag-bg: #ffd84a; --h-tag-text: #121212; --h-marker: rgba(255, 216, 74, .45); }
-.c-chart { inset: 10% 0 0 0; background: repeating-linear-gradient(180deg, rgba(255, 255, 255, .09) 0 1px, transparent 1px 25%); animation: c-float 7s ease-in-out 3s infinite alternate; }
-.c-chart svg { display: block; width: 100%; height: 100%; animation: wipe-right 2.8s cubic-bezier(.6, 0, .2, 1) .4s both; }
-.c-chart .c-line { fill: none; stroke: rgba(255, 255, 255, .8); stroke-width: 2; vector-effect: non-scaling-stroke; }
-.c-dot { position: absolute; left: 92%; top: 18%; width: 14px; height: 14px; margin: -7px; border-radius: 50%; background: #ffd84a; animation: q-fade .5s ease-out 2.9s both; }
-.c-dot::before, .c-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #ffd84a; opacity: 0; animation: c-pulse 2.8s ease-out 3s infinite; }
-.c-dot::after { animation-delay: 4.4s; }
-@keyframes c-pulse { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(5.5); } }
-@keyframes c-float { from { transform: translateY(0); } to { transform: translateY(-14px); } }
-@media (max-width: 768px) {
-  .c-chart { inset: 0 0 auto 0; height: 330px; }
-  .c-chart .c-line { stroke: rgba(255, 255, 255, .5); }
-}
+/* 案3：淡いブルーグレー × 紺 × 青。文字のない白いレシートが、揺れながらトップ全体をゆっくり舞い落ちる（レシートは script.js が置く） */
+.hero { --h-bg: #e9eff6; --h-text: #132238; --h-accent: #2f6fdd; --h-line: #132238; --h-chip-bg: #132238; --h-chip-text: #fff; --h-btn-bg: #2f6fdd; --h-btn-text: #fff; --h-tag-bg: #fff; --h-tag-text: #132238; --h-marker: rgba(47, 111, 221, .22); }
+.r-rain { inset: 0; font-size: 10px; overflow: hidden; animation: q-fade 1.6s ease-out both; }
+.r-slip { position: absolute; top: -24em; left: var(--x); font-size: var(--fs); animation: r-fall var(--t) linear var(--dl) infinite; }
+.r-slip b { position: relative; display: grid; gap: .75em; width: 9.6em; padding: 1.3em 1.1em 1.5em; background: #fff; filter: drop-shadow(0 1.2em 1.8em rgba(19, 34, 56, .13)); animation: r-sway var(--w) ease-in-out infinite alternate; }
+.r-slip b::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: .6em; background: linear-gradient(-135deg, #fff .43em, transparent 0) 0 0 / 1.2em .6em, linear-gradient(135deg, #fff .43em, transparent 0) 0 0 / 1.2em .6em; }
+.r-slip i { display: block; height: .5em; border-radius: 1em; background: #d6deea; }
+.r-slip i.s { width: 56%; }
+.r-slip i.t { width: 44%; justify-self: end; margin-top: .5em; background: #2f6fdd; }
+@keyframes r-fall { to { transform: translateY(calc(var(--H, 900px) + 50em)); } }
+@keyframes r-sway { from { transform: rotate(-8deg) translateX(-1.2em); } to { transform: rotate(8deg) translateX(1.2em); } }
+@media (max-width: 768px) { .r-rain { font-size: 7px; } .r-slip:nth-child(even) { display: none; } }
