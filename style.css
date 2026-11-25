@@ -677,16 +677,19 @@ main { overflow-x: clip; }
 @keyframes q-phone { from { opacity: 0; transform: translateY(48px); } to { opacity: 1; transform: none; } }
 @keyframes q-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-12px) rotate(-1deg); } }
 .hero::before, .hero::after { pointer-events: none; }
+.hero-bg { position: absolute; pointer-events: none; }
 
-/* 案3：白と緑の 2 分割。右から緑の面が斜めに入ってきて止まり、手前の淡い面だけがゆっくり寄せては返す */
-.hero { --h-bg: #fff; --h-text: #121212; --h-accent: #21b384; --h-line: #121212; --h-chip-bg: #21b384; --h-chip-text: #fff; --h-btn-bg: #121212; --h-btn-text: #fff; --h-tag-bg: #fff; --h-tag-text: #121212; --h-marker: rgba(33, 179, 132, .3); }
-.hero::before { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 40%; background: #21b384; clip-path: polygon(24% 0, 100% 0, 100% 100%, 0 100%); animation: h3-panel 1.4s var(--ease-out) both; }
-.hero::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 52%; background: rgba(33, 179, 132, .14); clip-path: polygon(24% 0, 100% 0, 100% 100%, 0 100%); animation: h3-panel 1.6s var(--ease-out) .1s both, h3-sway 5s ease-in-out 1.7s infinite alternate; }
-@keyframes h3-panel { from { transform: translateX(100%); } to { transform: translateX(0); } }
-@keyframes h3-sway { from { transform: translateX(0); } to { transform: translateX(14%); } }
+/* 案3：ブルー × 白文字 × イエロー。右肩上がりの線が左から描かれ、先端の点が脈を打ち続ける（SVG は script.js が置く） */
+.hero { --h-bg: #1648c8; --h-text: #fff; --h-accent: #ffd84a; --h-line: rgba(255, 255, 255, .6); --h-chip-bg: #fff; --h-chip-text: #1648c8; --h-btn-bg: #fff; --h-btn-text: #1648c8; --h-tag-bg: #ffd84a; --h-tag-text: #121212; --h-marker: rgba(255, 216, 74, .45); }
+.c-chart { inset: 10% 0 0 0; background: repeating-linear-gradient(180deg, rgba(255, 255, 255, .09) 0 1px, transparent 1px 25%); animation: c-float 7s ease-in-out 3s infinite alternate; }
+.c-chart svg { display: block; width: 100%; height: 100%; animation: wipe-right 2.8s cubic-bezier(.6, 0, .2, 1) .4s both; }
+.c-chart .c-line { fill: none; stroke: rgba(255, 255, 255, .8); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.c-dot { position: absolute; left: 92%; top: 18%; width: 14px; height: 14px; margin: -7px; border-radius: 50%; background: #ffd84a; animation: q-fade .5s ease-out 2.9s both; }
+.c-dot::before, .c-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #ffd84a; opacity: 0; animation: c-pulse 2.8s ease-out 3s infinite; }
+.c-dot::after { animation-delay: 4.4s; }
+@keyframes c-pulse { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(5.5); } }
+@keyframes c-float { from { transform: translateY(0); } to { transform: translateY(-14px); } }
 @media (max-width: 768px) {
-  /* 緑の面は端末の後ろ、動く淡い面は最初の画面の右上に置く */
-  .hero::before { top: auto; width: 100%; height: 250px; clip-path: polygon(0 26%, 100% 0, 100% 100%, 0 100%); }
-  .hero::after { bottom: auto; width: 62%; height: 250px; background: rgba(33, 179, 132, .2); clip-path: polygon(40% 0, 100% 0, 100% 100%); }
-  @keyframes h3-sway { from { transform: translateX(0); } to { transform: translateX(22%); } }
+  .c-chart { inset: 0 0 auto 0; height: 330px; }
+  .c-chart .c-line { stroke: rgba(255, 255, 255, .5); }
 }

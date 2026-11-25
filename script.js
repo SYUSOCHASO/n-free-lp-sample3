@@ -283,3 +283,16 @@ $(function(){
     window.addEventListener('load', request);
     request();
 })();
+
+/* ------------------------------------------------------------
+   案3：右肩上がりのグラフ線（描かれる動きと先端の脈は CSS）
+------------------------------------------------------------ */
+(function () {
+    var host = document.querySelector('.hero');
+    if (!host) return;
+    var line = 'M0 340C80 330 120 300 180 310S280 250 340 262S440 200 500 214S600 140 660 156S780 90 830 100S890 70 920 72';
+    host.insertAdjacentHTML('afterbegin',
+        '<div class="hero-bg c-chart" aria-hidden="true"><svg viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">'
+        + '<defs><linearGradient id="c-grad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".62" stop-color="#fff" stop-opacity=".16"/><stop offset=".92" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>'
+        + '<path d="' + line + 'L920 400L0 400Z" fill="url(#c-grad)"/><path class="c-line" d="' + line + '"/></svg><i class="c-dot"></i></div>');
+})();
